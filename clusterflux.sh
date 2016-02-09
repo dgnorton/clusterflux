@@ -76,7 +76,7 @@ if [ ! -d "$BASEDIR" ]; then
 fi
 
 # copy utility scripts to base dir
-cp servers.sh $BASEDIR
+echo 'influx -port 8186 -execute "show servers"' > $BASEDIR/servers.sh && chmod ug+x $BASEDIR/servers.sh
 
 # change to the base dir
 cd $BASEDIR
