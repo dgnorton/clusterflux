@@ -121,7 +121,10 @@ createNodeConfig () {
 
 # startNode starts influxd for the specified node
 startNode() {
-	NODE="n$1"
+	# node's number
+	nodeNum=$1
+	# node's name
+	NODE="n$nodeNum"
 	# node's base directory
 	NODEDIR="$BASEDIR/$NODE"
 	# node's config file
@@ -130,14 +133,14 @@ startNode() {
 	if [ "$NODE" = "n1" ]; then
 		echo "$NODE: no join"
 		if [ ! -z "$TMUX_SESSION" ]; then
-			tmux send-keys -t $TMUX_SESSION:$tmuxWindow.$1 "eval ${INFLUXD} -config $BASEDIR/$NODE/$CONFIG &" C-m
+			tmux send-keys -t $TMUX_SESSION:$tmuxWindow.$((firstPane + nodeNum)) "eval ${INFLUXD} -config $BASEDIR/$NODE/$CONFIG &" C-m
 		else
 			eval ${INFLUXD} -config $BASEDIR/$NODE/$CONFIG &
 		fi
 	else
 		echo "$NODE: $JOIN"
 		if [ ! -z "$TMUX_SESSION" ]; then
-			tmux send-keys -t $TMUX_SESSION:$tmuxWindow.$1 "eval ${INFLUXD} -config $BASEDIR/$NODE/$CONFIG $JOIN &" C-m
+			tmux send-keys -t $TMUX_SESSION:$tmuxWindow.$((firstPane + nodeNum)) "eval ${INFLUXD} -config $BASEDIR/$NODE/$CONFIG $JOIN &" C-m
 		else
 			eval ${INFLUXD} -config $BASEDIR/$NODE/$CONFIG $JOIN &
 		fi
@@ -156,6 +159,8 @@ if [ ! -z "$TMUX_SESSION" ]; then
 		tmuxWindow=$(tmux display-message -p | awk '{print $2}' | awk -F: '{print $1}')
 	fi
 
+	firstPane=$(tmux display-message -p | awk '{print $5}')
+
 	tmux split-window -h -t $TMUX_SESSION -p 60 
 	totalLines=$(tput lines)
 	panelSize=$((totalLines / totalNodes))
@@ -170,7 +175,7 @@ createNodes () {
 
 	for i in $(seq 1 $numNodes); do
 		if [ ! -z "$TMUX_SESSION" -a "$nextNodeNum" -gt "1" ]; then
-			tmux split-window -v -t $TMUX_SESSION:$tmuxWindow.1 -l $panelSize
+			tmux split-window -v -t $TMUX_SESSION:$tmuxWindow.$((firstPane + 1)) -l $panelSize
 		fi
 		createNodeConfig "$nextNodeNum" "$nodeType"
 		nextNodeNum=$((nextNodeNum+1))
@@ -188,7 +193,7 @@ for i in $(seq 1 $totalNodes); do
 done
 
 if [ ! -z "$TMUX_SESSION" ]; then
-	tmux select-pane -t $TMUX_SESSION:$tmuxWindow.0
+	tmux select-pane -t $TMUX_SESSION:$tmuxWindow.$firstPane
 	if [ "$tmuxWindow" -eq "0" ]; then
 		tmux -2 attach-session -t $TMUX_SESSION
 	fi
