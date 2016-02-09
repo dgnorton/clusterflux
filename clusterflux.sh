@@ -75,6 +75,9 @@ if [ ! -d "$BASEDIR" ]; then
 	mkdir -p $BASEDIR
 fi
 
+# copy utility scripts to base dir
+cp servers.sh $BASEDIR
+
 # change to the base dir
 cd $BASEDIR
 
