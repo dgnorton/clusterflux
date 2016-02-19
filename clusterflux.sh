@@ -114,7 +114,7 @@ createNodeConfig () {
 		if [ "$JOIN" = "" ]; then
 			JOIN="-join localhost:8${1}91"
 		else
-			JOIN="$JOIN, localhost:8${1}91"
+			JOIN="$JOIN,localhost:8${1}91"
 		fi
 	fi
 }
@@ -130,21 +130,21 @@ startNode() {
 	# node's config file
 	NODECFG="$NODEDIR/$CONFIG"
 
-	if [ "$NODE" = "n1" ]; then
-		echo "$NODE: no join"
-		if [ ! -z "$TMUX_SESSION" ]; then
-			tmux send-keys -t $TMUX_SESSION:$tmuxWindow.$((firstPane + nodeNum)) "eval ${INFLUXD} -config $BASEDIR/$NODE/$CONFIG &" C-m
-		else
-			eval ${INFLUXD} -config $BASEDIR/$NODE/$CONFIG &
-		fi
-	else
+	#if [ "$NODE" = "n1" ]; then
+	#	echo "$NODE: no join"
+	#	if [ ! -z "$TMUX_SESSION" ]; then
+	#		tmux send-keys -t $TMUX_SESSION:$tmuxWindow.$((firstPane + nodeNum)) "eval ${INFLUXD} -config $BASEDIR/$NODE/$CONFIG &" C-m
+	#	else
+	#		eval ${INFLUXD} -config $BASEDIR/$NODE/$CONFIG &
+	#	fi
+	#else
 		echo "$NODE: $JOIN"
 		if [ ! -z "$TMUX_SESSION" ]; then
 			tmux send-keys -t $TMUX_SESSION:$tmuxWindow.$((firstPane + nodeNum)) "eval ${INFLUXD} -config $BASEDIR/$NODE/$CONFIG $JOIN &" C-m
 		else
 			eval ${INFLUXD} -config $BASEDIR/$NODE/$CONFIG $JOIN &
 		fi
-	fi
+	#fi
 }
 
 totalNodes=$((NODES + META_NODES + DATA_NODES))
