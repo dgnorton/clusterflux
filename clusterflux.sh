@@ -18,7 +18,7 @@ META_NODES=0
 DATA_NODES=0
 
 # parse command line options
-while getopts ":b:c:pe:jt:d:m:n:k:" opt; do
+while getopts ":b:c:pe:jt:d:m:n:k:f:" opt; do
 	case $opt in
 		b)
 			BASEDIR="$OPTARG"
@@ -54,6 +54,9 @@ while getopts ":b:c:pe:jt:d:m:n:k:" opt; do
 			tmux kill-session -t $OPTARG
 			exit 0
 			;;
+		f)
+			TEST_FILE=$OPTARG
+			;;
 		\?)
 			echo "Invalid option: -$OPTARG" >&2
 			exit 1
@@ -77,6 +80,11 @@ fi
 
 # copy utility scripts to base dir
 echo 'influx -port 8186 -execute "show servers"' > $BASEDIR/servers.sh && chmod ug+x $BASEDIR/servers.sh
+if [ ! -z "$TEST_FILE" ]; then
+	cp $TEST_FILE $BASEDIR
+	testFileName=$(echo "$TEST_FILE" | awk -F/ '{print $NF}')
+	chmod ug+x $BASEDIR/$testFileName
+fi
 
 # change to the base dir
 cd $BASEDIR
